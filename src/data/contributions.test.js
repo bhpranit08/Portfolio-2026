@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict'
+import { buildContributionCalendar, contributions, contributionYear } from './contributions.js'
+
+const calendar = buildContributionCalendar(contributionYear, contributions)
+assert.equal(calendar.months.length, 12)
+assert.equal(calendar.cells.filter(Boolean).length, 365)
+assert.equal(calendar.cells.length, calendar.weeks * 7)
+assert.equal(calendar.cells[4].date, '2026-01-01', 'January 1 belongs on Thursday')
+assert.equal(calendar.total, contributions.reduce((sum, entry) => sum + entry.count, 0))
+assert.deepEqual([...new Set(calendar.cells.filter(Boolean).map((cell) => cell.level))].sort(), [0, 1, 2, 3, 4])
+const leap = buildContributionCalendar(2024, [{ date: '2024-02-29', count: 9 }])
+assert.equal(leap.cells.filter(Boolean).length, 366)
+assert.equal(leap.total, 9)
+assert.equal(leap.cells.find((cell) => cell?.date === '2024-02-29').level, 3)
+assert.equal(buildContributionCalendar(2000, []).weeks, 54, 'Leap years starting Saturday need 54 columns')
+assert.throws(() => buildContributionCalendar(2026, [{ date: '2026-02-30', count: 1 }]))
+assert.throws(() => buildContributionCalendar(2026, [{ date: '2026-01-01', count: -1 }]))
+assert.throws(() => buildContributionCalendar(2026, [{ date: '2026-01-01', count: 1 }, { date: '2026-01-01', count: 2 }]))
