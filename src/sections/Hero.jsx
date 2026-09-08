@@ -1,6 +1,15 @@
+import { useRef } from 'react'
+import useHeroAnimations from '../animations/useHeroAnimations.js'
+
+function HeroScrollIndicator() {
+  return <div className="hero-enter"><a href="#about">SCROLL TO ENTER <span className="scroll-arrow" aria-hidden="true">↓</span></a></div>
+}
+
 export default function Hero() {
+  const root = useRef()
+  useHeroAnimations(root)
   return (
-    <section id="hero" className="hero" aria-labelledby="hero-title">
+    <section ref={root} id="hero" className="hero" aria-labelledby="hero-title">
       <header className="hero-header">
         <a className="wordmark" href="#hero" aria-label="PS 2026 home">PS<span>//</span>2026</a>
         <span className="system-status"><i aria-hidden="true" />SYSTEM STATUS: ONLINE</span>
@@ -14,7 +23,7 @@ export default function Hero() {
       </div>
       <div className="core-caption" aria-hidden="true"><span>CORE / 001</span><span>INTERACTIVE OBJECT</span><b>+</b></div>
       <footer className="hero-footer">
-        <a href="#about">SCROLL TO ENTER <span aria-hidden="true">↓</span></a>
+        <HeroScrollIndicator />
         <span>DEVELOPER PORTFOLIO — V.2026</span>
       </footer>
     </section>

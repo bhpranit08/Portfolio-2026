@@ -7,7 +7,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js'
 import { Vector2 } from 'three'
 
 export default function CoreEffects() {
-  const { gl, scene, camera, size, viewport } = useThree()
+  const { gl, scene, camera, size, viewport, invalidate } = useThree()
   const composer = useRef()
 
   useEffect(() => {
@@ -22,6 +22,7 @@ export default function CoreEffects() {
     effects.addPass(bloom)
     effects.addPass(output)
     composer.current = effects
+    invalidate() // Demand rendering must draw the newly allocated resize targets.
     return () => {
       composer.current = null
       render.dispose()
@@ -29,7 +30,7 @@ export default function CoreEffects() {
       output.dispose()
       effects.dispose()
     }
-  }, [gl, scene, camera, size.width, size.height, viewport.dpr])
+  }, [gl, scene, camera, size.width, size.height, viewport.dpr, invalidate])
 
   useFrame(() => {
     if (composer.current) composer.current.render()

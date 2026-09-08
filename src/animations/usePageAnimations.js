@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { animate, createScope, stagger } from 'animejs'
+import { animate, createScope } from 'animejs'
 import useReducedMotion from '../hooks/useReducedMotion.js'
 
 export default function usePageAnimations(root) {
@@ -7,9 +7,6 @@ export default function usePageAnimations(root) {
   useEffect(() => {
     if (reducedMotion) return
     const scope = createScope({ root })
-    scope.add(() => {
-      animate('[data-hero-line]', { y: ['105%', '0%'], duration: 850, delay: stagger(100), ease: 'out(4)' })
-    })
     const observer = new IntersectionObserver((entries) => {
       for (const entry of entries) {
         if (!entry.isIntersecting) continue

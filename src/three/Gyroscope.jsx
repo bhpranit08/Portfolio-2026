@@ -5,7 +5,7 @@ import { updateMotion } from './motion.js'
 import { createCoreMaterial } from './core-material.js'
 import { useAnimationState } from '../hooks/useAnimationState.js'
 
-export default function Gyroscope({ ref, mouseInfluence = 1, reducedMotion = false, ...transform }) {
+export default function Gyroscope({ ref, controls, mouseInfluence = 1, reducedMotion = false, ...transform }) {
   const { scene } = useGLTF('/models/gyroscope.glb')
   const root = useRef()
   const group = useRef()
@@ -28,16 +28,27 @@ export default function Gyroscope({ ref, mouseInfluence = 1, reducedMotion = fal
   useEffect(() => () => materials.forEach((material) => material.dispose()), [materials])
 
   // Outer transforms remain independent of idle motion. Named nodes stay accessible.
-  // Shared input stays live without React renders; no scroll choreography yet.
-  useImperativeHandle(ref, () => ({ group: root.current, model, input: store.state }), [model, store])
+  // Section controls act on the inner rig; outer transforms remain available.
+  useImperativeHandle(ref, () => ({ group: root.current, model, input: store.state, controls }), [model, store, controls])
 
   useFrame((_, delta) => {
-    if (!reducedMotion) updateMotion(motion.current, group.current.rotation, store.state.mouse, delta, mouseInfluence)
+    if (reducedMotion) {
+      group.current.rotation.set(0, 0, 0)
+      group.current.position.set(0, 0, 0)
+      group.current.scale.setScalar(1)
+      materials.forEach((material) => { material.emissiveIntensity = 3 })
+      return
+    }
+    updateMotion(motion.current, group.current.rotation, store.state.mouse, delta, mouseInfluence, controls)
+    group.current.position.set(motion.current.offsetX, motion.current.offsetY, 0)
+    group.current.rotation.z = motion.current.roll
+    group.current.scale.setScalar(motion.current.scale)
+    materials.forEach((material) => { material.emissiveIntensity = motion.current.energy })
   })
 
   return (
-    <group ref={root} {...transform}>
-      <group ref={group}>
+    <group ref={root} name="core-root" {...transform}>
+      <group ref={group} name="core-motion">
         <Center>
           <primitive object={model} dispose={null} />
         </Center>

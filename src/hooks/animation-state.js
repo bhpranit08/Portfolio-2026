@@ -3,11 +3,13 @@ export function createAnimationState() {
   const state = {
     scroll: 0, progress: 0, velocity: 0, idleTime: 0,
     mouse: { x: 0, y: 0, velocityX: 0, velocityY: 0 },
+    hero: { intro: 0, active: false, progress: 0, velocity: 0, wake: 0, exit: 0 },
   }
   const listeners = new Set()
   let pointerTime = null
   return {
     state,
+    setHero(values) { Object.assign(state.hero, values) },
     subscribe(callback) {
       listeners.add(callback)
       return () => listeners.delete(callback)
