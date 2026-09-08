@@ -1,15 +1,22 @@
+import { createSectionStops, updateSectionProgress } from '../three/core-timeline.js'
+
 // Stable mutable state: animation consumers read this without React renders.
 export function createAnimationState() {
   const state = {
     scroll: 0, progress: 0, velocity: 0, idleTime: 0,
     mouse: { x: 0, y: 0, velocityX: 0, velocityY: 0 },
     hero: { intro: 0, active: false, progress: 0, velocity: 0, wake: 0, exit: 0 },
+    timeline: { stops: [], current: 'hero', next: 'hero', progress: 0 },
   }
   const listeners = new Set()
   let pointerTime = null
   return {
     state,
     setHero(values) { Object.assign(state.hero, values) },
+    setSections(sections, viewportHeight, limit) {
+      state.timeline.stops = createSectionStops(sections, viewportHeight, limit)
+      updateSectionProgress(state.timeline, state.progress)
+    },
     subscribe(callback) {
       listeners.add(callback)
       return () => listeners.delete(callback)
@@ -19,6 +26,7 @@ export function createAnimationState() {
       state.scroll = scroll
       state.progress = limit > 0 ? Math.max(0, Math.min(1, scroll / limit)) : 0
       state.velocity = velocity
+      updateSectionProgress(state.timeline, state.progress)
     },
     updatePointer(x, y, now) {
       const dt = pointerTime === null ? 0 : Math.max((now - pointerTime) / 1000, 1 / 240)

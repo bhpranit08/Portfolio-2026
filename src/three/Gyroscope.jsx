@@ -27,8 +27,7 @@ export default function Gyroscope({ ref, controls, mouseInfluence = 1, reducedMo
 
   useEffect(() => () => materials.forEach((material) => material.dispose()), [materials])
 
-  // Outer transforms remain independent of idle motion. Named nodes stay accessible.
-  // Section controls act on the inner rig; outer transforms remain available.
+  // The section timeline owns the outer rig; idle/pointer motion stays additive inside it.
   useImperativeHandle(ref, () => ({ group: root.current, model, input: store.state, controls }), [model, store, controls])
 
   useFrame((_, delta) => {
@@ -36,7 +35,7 @@ export default function Gyroscope({ ref, controls, mouseInfluence = 1, reducedMo
       group.current.rotation.set(0, 0, 0)
       group.current.position.set(0, 0, 0)
       group.current.scale.setScalar(1)
-      materials.forEach((material) => { material.emissiveIntensity = 3 })
+      materials.forEach((material) => { material.emissiveIntensity = controls?.energy ?? 3 })
       return
     }
     updateMotion(motion.current, group.current.rotation, store.state.mouse, delta, mouseInfluence, controls)

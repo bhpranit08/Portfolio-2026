@@ -3,6 +3,7 @@ import Lenis from 'lenis'
 import 'lenis/dist/lenis.css'
 import { AnimationContext } from '../hooks/useAnimationState.js'
 import { createAnimationState } from '../hooks/animation-state.js'
+import { coreStates } from '../three/core-timeline.js'
 
 export default function LenisProvider({ children }) {
   const [store] = useState(createAnimationState)
@@ -12,6 +13,19 @@ export default function LenisProvider({ children }) {
     const syncScroll = () => store.updateScroll(lenis)
     const unsubscribe = lenis.on('scroll', syncScroll)
     syncScroll()
+    const sections = coreStates.map(({ id }) => document.getElementById(id)).filter(Boolean)
+    const measure = () => {
+      lenis.resize()
+      syncScroll()
+      store.setSections(sections.map((section) => ({
+        id: section.id, top: section.getBoundingClientRect().top + lenis.actualScroll,
+      })), window.innerHeight, lenis.limit)
+    }
+    const resize = new ResizeObserver(measure)
+    sections.forEach((section) => resize.observe(section))
+    resize.observe(document.documentElement)
+    window.addEventListener('resize', measure)
+    measure()
     const pointer = (event) => {
       if (event.pointerType === 'touch') return
       store.updatePointer(event.clientX / window.innerWidth * 2 - 1, 1 - event.clientY / window.innerHeight * 2, performance.now())
@@ -38,6 +52,8 @@ export default function LenisProvider({ children }) {
     return () => {
       cancelAnimationFrame(frame)
       unsubscribe()
+      resize.disconnect()
+      window.removeEventListener('resize', measure)
       lenis.destroy()
       window.removeEventListener('pointermove', pointer)
       window.removeEventListener('keydown', releaseKeyboardScroll)
