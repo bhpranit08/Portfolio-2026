@@ -4,10 +4,15 @@ export const contributionYear = 2026
 export const contributions = Array.from({ length: 365 }, (_, index) => {
   const date = new Date(Date.UTC(contributionYear, 0, index + 1))
   const sample = ((index + 11) * 16807) % 101
-  return { date: date.toISOString().slice(0, 10), count: sample < 32 ? 0 : sample % 13 + 1 }
+  return { date: date.toISOString().slice(0, 10), count: sample < 46 ? 0 : sample < 80 ? 1 : sample % 13 + 1 }
 })
 
-export function buildContributionCalendar(year, entries) {
+export const contributionLevels = [0, 1, 4, 7, 10]
+
+export function buildContributionCalendar(year, entries, levels = contributionLevels) {
+  if (levels.length !== 5 || levels[0] !== 0 || levels.some((value, index) => !Number.isInteger(value) || (index > 0 && value <= levels[index - 1]))) {
+    throw new Error('Contribution levels require five increasing integer thresholds starting at zero')
+  }
   const counts = new Map()
   for (const { date, count } of entries) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date)) || new Date(date).toISOString().slice(0, 10) !== date || !Number.isInteger(count) || count < 0) {
@@ -25,7 +30,7 @@ export function buildContributionCalendar(year, entries) {
     if (day < 0 || day >= days) return null
     const date = new Date(start + day * 86400000).toISOString().slice(0, 10)
     const count = counts.get(date) ?? 0
-    return { date, count, level: count === 0 ? 0 : Math.min(4, Math.ceil(count / 3)) }
+    return { date, count, level: levels.findLastIndex((threshold) => count >= threshold) }
   })
   const months = Array.from({ length: 12 }, (_, month) => {
     const date = new Date(Date.UTC(year, month, 1))

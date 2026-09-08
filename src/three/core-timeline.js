@@ -4,7 +4,7 @@ import { heroPhase } from '../animations/hero-motion.js'
 // Rotation: radians. Scale and energy/particles: multipliers of the original HERO.
 export const coreStates = [
   { id: 'hero', position: [0.24, 0, 0], rotation: [0.08, -0.28, -0.12], scale: 1, energy: 1, particles: 1, camera: [0, 0, 0], mobile: { position: [0, -0.24, 0] } },
-  { id: 'about', position: [0.27, -0.22, -0.02], rotation: [0.25, 0.65, 0.16], scale: 0.76, energy: 0.72, particles: 0.7, camera: [0.008, 0, 0.015], mobile: { position: [0.22, -0.3, -0.02], scale: 0.7 } },
+  { id: 'about', position: [0.27, -0.22, -0.02], rotation: [0.25, 0.65, 0.16], scale: 0.76, energy: 0.72, particles: 0.7, camera: [0.008, 0, 0.015], mobile: { position: [0.36, -0.3, -0.02], scale: 0.5 } },
   { id: 'activity', position: [0.35, 0.3, -0.05], rotation: [-0.12, 1.1, -0.24], scale: 0.43, energy: 0.58, particles: 0.45, camera: [-0.006, 0.005, 0.025], mobile: { position: [0.3, 0.34, -0.05], scale: 0.4 } },
   { id: 'work', position: [0.23, -0.2, 0.015], rotation: [0.32, -0.65, 0.2], scale: 0.96, energy: 1.18, particles: 1.05, camera: [0.006, -0.004, -0.015], mobile: { position: [0.08, -0.3, 0.015], scale: 0.83 } },
   { id: 'stack', position: [-0.2, -0.28, -0.02], rotation: [-0.24, 0.38, -0.32], scale: 0.65, energy: 1, particles: 0.85, camera: [-0.008, 0, 0.01], mobile: { position: [-0.23, -0.3, -0.02], scale: 0.6 } },
