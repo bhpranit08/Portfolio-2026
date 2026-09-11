@@ -46,13 +46,13 @@ The machine occupies the hero’s approved composition, the About side space, an
 
 ## Public GitHub contributions
 
-Activity requests the current UTC calendar year for `bhpranit08` from the hosted [GitHub Contributions API](https://github.com/grubersjoe/github-contributions-api), a public profile-calendar scraper. The browser calls it directly. No GitHub token, authentication, environment variable, backend, or serverless proxy is needed.
+Activity displays the latest 365 days through the visitor’s current date for `bhpranit08`, requesting each calendar year touched by that range from the hosted [GitHub Contributions API](https://github.com/grubersjoe/github-contributions-api), a public profile-calendar scraper. The browser calls it directly. No GitHub token, authentication, environment variable, backend, or serverless proxy is needed.
 
 `contributions.js` isolates the response format, validates records, and returns `{ date: 'YYYY-MM-DD', count: number }`. `buildContributionCalendar()` calculates totals, five intensity levels, UTC month/week alignment, and leap-year layouts. It rejects invalid dates, negative/fractional counts, and duplicates. Upstream totals and intensity values are not trusted as presentation data.
 
-`useGithubContributions.js` supplies loading, live, and fallback states. In-flight requests are shared, successful results remain in memory for one hour, and a ten-second timeout prevents indefinite loading. Network, HTTP, JSON, and validation failures use the original 2026 sample, explicitly labelled LOCAL SAMPLE / FALLBACK. The graph mounts after records resolve so the entrance counts to the final value once.
+`useGithubContributions.js` supplies loading, live, and fallback states. In-flight requests are shared, successful results remain in memory for one hour, and a ten-second timeout prevents indefinite loading. Network, HTTP, JSON, and validation failures use the original deterministic sample pattern, mapped onto the rolling date range and explicitly labelled LOCAL SAMPLE / FALLBACK. The graph mounts after records resolve so the entrance counts to the final value once.
 
-The existing `ContributionGraph.jsx` table retains seven weekday rows, twelve month labels, square cells, five purple intensity levels, LESS/MORE legend, a calculated total, and a technical tooltip. Arrow keys move between dates; Home/End jump to the edges; Escape dismisses the tooltip. Only the graph scrolls horizontally on narrow screens.
+The existing `ContributionGraph.jsx` table retains seven weekday rows, twelve visible month labels (omitting a partial leading month label when the range touches thirteen months), square cells, five purple intensity levels, LESS/MORE legend, a calculated total, and a technical tooltip. Arrow keys move between dates; Home/End jump to the edges; Escape dismisses the tooltip. Only the graph scrolls horizontally on narrow screens.
 
 ## DOM motion and accessibility
 
@@ -95,15 +95,16 @@ Updated in the completion pass:
 - `src/three/GlobalScene.jsx`, `CoreStage.jsx`, `CoreEffects.jsx`, `core-timeline.js`, `core-timeline.test.js`
 - `src/styles/global.css`, `index.html`, `public/favicon.svg`, `README.md`
 
-The pre-existing public contribution pipeline, Activity presentation, About animation, gyroscope asset/material/motion implementation, package manifest, and lockfile were preserved.
+The public contribution service, Activity table/interactions, About animation, gyroscope asset/material/motion implementation, package manifest, and lockfile were preserved. Newer workspace edits converted Activity to a rolling 365-day range during final verification. Compatibility fixes in `src/data/contributions.js`, `src/data/contributions.test.js`, and `src/components/ContributionGraph.jsx` restore validation before rendering, use UTC calendar arithmetic, keep twelve visible month labels, and pass the hook’s date range directly to the graph. The newer `src/hooks/useGithubContributions.js` date-range flow remains in place.
 
 ## Browser verification — 2026-09-11
 
-The browser scripts are local verification artifacts in `/tmp` and use the already available Playwright/Chromium installation; no browser-test dependency was added to the portfolio.
+The browser scripts are local verification artifacts in `/tmp` and use the already available Playwright/Chromium installation; no browser-test dependency was added to the portfolio. The initial browser suites below exercised the calendar-year Activity implementation. The final rolling-range suite verifies the newer Activity implementation separately; other section and CORE code is unchanged.
 
 | Command | Result |
 | --- | --- |
 | `npm test` | All six test files passed |
+| `TZ=America/New_York npm test` | All six test files passed with a daylight-saving time zone |
 | `npm run lint` | Passed, no lint errors |
 | `npm run build` | Passed; expected warning for the large deferred 3D chunk |
 | `npm run dev -- --host 127.0.0.1` | Development server exercised on port 3001 |
@@ -112,6 +113,7 @@ The browser scripts are local verification artifacts in `/tmp` and use the alrea
 | `node /tmp/portfolio-production-check.mjs` | Passed against the built mobile site, including the lazy scene, CORE, menu, Activity, and console checks |
 | `node /tmp/portfolio-live-check.mjs` | Fresh real browser request passed: 565 contributions, summed from 365 public records |
 | `node /tmp/portfolio-motion-check.mjs` | Passed at 1100×760 with normal motion: hero entrance, pointer response, first-scroll wake, all six handoffs with the same Canvas, menu animation, Activity entrance with captured public records, Contact fade, reverse scroll, and reduced-motion switching; no console errors |
+| `node /tmp/portfolio-rolling-check.mjs` | Final built Activity passed at 1440×1000 and 390×844: 655 real contributions from 2025-09-12 through 2026-09-11, 365 cells, twelve visible month labels, keyboard/tooltip behavior, no overflow, and invalid-data/timeout fallback to 646 sample contributions |
 | `node /tmp/portfolio-failure-check.mjs` | API failure, timeout, missing model, and failed scene import all left the portfolio and navigation usable |
 
 Desktop and mobile screenshots of all seven sections and the navigation were visually inspected. An earlier normal-motion run encountered a public-data fallback; live networking and animation were subsequently checked separately. Injected network/model failures intentionally produce failed resource requests; the no-console-error result applies to healthy page runs. No physical-device FPS, Safari, or Firefox claim is made.

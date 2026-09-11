@@ -329,3 +329,4 @@ summary { list-style: none; }
   *, *::before, *::after { transition-duration: 0s !important; animation-duration: 0s !important; }
   .project-row:hover h3, .project-row:focus-within h3, .stack-index li:hover h3 { translate: none; }
 }
+.graph-range { margin: 16px 0 0; color: var(--muted); font: 9px/1.6 var(--mono); letter-spacing: 0.04em; }

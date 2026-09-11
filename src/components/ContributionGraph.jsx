@@ -7,7 +7,6 @@ import {
 import {
   buildContributionCalendar,
   contributionLevels,
-  getRollingYearRange,
 } from '../data/contributions.js'
 
 import useContributionAnimations from '../animations/useContributionAnimations.js'
@@ -23,18 +22,12 @@ const days = [
 ]
 
 export default function ContributionGraph({
+  startDate,
+  endDate,
   contributions,
   levels = contributionLevels,
   status = 'fallback',
 }) {
-  /*
-   * The graph always represents the latest 365 days.
-   */
-  const { startDate, endDate } = useMemo(
-    () => getRollingYearRange(),
-    [],
-  )
-
   const {
     cells,
     months,

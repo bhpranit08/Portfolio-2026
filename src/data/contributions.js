@@ -16,17 +16,18 @@ export const contributionYear = new Date().getFullYear()
  */
 
 function formatDate(date) {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
+  const year = date.getUTCFullYear()
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(date.getUTCDate()).padStart(2, '0')
 
   return `${year}-${month}-${day}`
 }
 
 function parseDate(dateString) {
-  const [year, month, day] = dateString.split('-').map(Number)
-
-  return new Date(year, month - 1, day)
+  if (typeof dateString !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dateString)) throw new Error('Invalid contribution date')
+  const date = new Date(`${dateString}T00:00:00Z`)
+  if (!Number.isFinite(date.getTime()) || formatDate(date) !== dateString) throw new Error('Invalid contribution date')
+  return date
 }
 
 /*
@@ -39,17 +40,16 @@ function parseDate(dateString) {
  * Example:
  * 2026-09-11 → 2025-09-12 through 2026-09-11
  */
-export function getRollingYearRange() {
-  const today = new Date()
+export function getRollingYearRange(today = new Date()) {
 
-  const end = new Date(
+  const end = new Date(Date.UTC(
     today.getFullYear(),
     today.getMonth(),
     today.getDate(),
-  )
+  ))
 
   const start = new Date(end)
-  start.setDate(start.getDate() - 364)
+  start.setUTCDate(start.getUTCDate() - 364)
 
   return {
     startDate: formatDate(start),
@@ -72,7 +72,7 @@ const sampleStartDate = parseDate(sampleRange.startDate)
 
 export const contributions = Array.from({ length: 365 }, (_, index) => {
   const date = new Date(sampleStartDate)
-  date.setDate(date.getDate() + index)
+  date.setUTCDate(date.getUTCDate() + index)
 
   const sample = ((index + 11) * 16807) % 101
 
@@ -118,6 +118,39 @@ const requests = new Map()
  * https://github.com/grubersjoe/github-contributions-api
  */
 
+function contributionCounts(entries) {
+  const counts = new Map()
+
+  /*
+   * Validate every contribution record.
+   */
+  for (const { date, count } of entries) {
+    if (
+      !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+      !Number.isFinite(Date.parse(`${date}T00:00:00Z`)) ||
+      new Date(`${date}T00:00:00Z`)
+        .toISOString()
+        .slice(0, 10) !== date ||
+      !Number.isInteger(count) ||
+      count < 0
+    ) {
+      throw new Error(
+        'Contributions require a valid YYYY-MM-DD date and a non-negative integer count',
+      )
+    }
+
+    if (counts.has(date)) {
+      throw new Error(
+        `Duplicate contribution date: ${date}`,
+      )
+    }
+
+    counts.set(date, count)
+  }
+
+  return counts
+}
+
 export function normalizeGithubContributions(data) {
   if (
     !Array.isArray(data?.contributions) ||
@@ -126,10 +159,9 @@ export function normalizeGithubContributions(data) {
     throw new Error('Public contribution data is unavailable')
   }
 
-  return data.contributions.map(({ date, count }) => ({
-    date,
-    count: Number(count) || 0,
-  }))
+  const entries = data.contributions.map(({ date, count }) => ({ date, count }))
+  contributionCounts(entries)
+  return entries
 }
 
 /*
@@ -184,6 +216,7 @@ function fetchGithubYear(year) {
  */
 
 export async function fetchGithubContributions(startDate, endDate) {
+  if (parseDate(startDate) > parseDate(endDate)) throw new Error('Contribution date range is reversed')
   const startYear = Number(startDate.slice(0, 4))
   const endYear = Number(endDate.slice(0, 4))
 
@@ -199,6 +232,7 @@ export async function fetchGithubContributions(startDate, endDate) {
 
   const start = parseDate(startDate)
   const end = parseDate(endDate)
+  if (end < start) throw new Error('Contribution date range is reversed')
 
   /*
    * Keep only records inside the exact rolling window.
@@ -272,52 +306,26 @@ export function buildContributionCalendar(
     )
   }
 
-  const counts = new Map()
-
-  /*
-   * Validate every contribution record.
-   */
-  for (const { date, count } of entries) {
-    if (
-      !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
-      !Number.isFinite(Date.parse(`${date}T00:00:00Z`)) ||
-      new Date(`${date}T00:00:00Z`)
-        .toISOString()
-        .slice(0, 10) !== date ||
-      !Number.isInteger(count) ||
-      count < 0
-    ) {
-      throw new Error(
-        'Contributions require a valid YYYY-MM-DD date and a non-negative integer count',
-      )
-    }
-
-    if (counts.has(date)) {
-      throw new Error(
-        `Duplicate contribution date: ${date}`,
-      )
-    }
-
-    counts.set(date, count)
-  }
+  const counts = contributionCounts(entries)
 
   const start = parseDate(startDate)
   const end = parseDate(endDate)
+  if (end < start) throw new Error('Contribution date range is reversed')
 
   /*
    * Expand backward to the Sunday containing the first date.
    */
   const gridStart = new Date(start)
-  gridStart.setDate(
-    gridStart.getDate() - gridStart.getDay(),
+  gridStart.setUTCDate(
+    gridStart.getUTCDate() - gridStart.getUTCDay(),
   )
 
   /*
    * Expand forward to the Saturday containing the last date.
    */
   const gridEnd = new Date(end)
-  gridEnd.setDate(
-    gridEnd.getDate() + (6 - gridEnd.getDay()),
+  gridEnd.setUTCDate(
+    gridEnd.getUTCDate() + (6 - gridEnd.getUTCDay()),
   )
 
   const totalGridDays =
@@ -337,8 +345,8 @@ export function buildContributionCalendar(
     (_, index) => {
       const date = new Date(gridStart)
 
-      date.setDate(
-        date.getDate() + index,
+      date.setUTCDate(
+        date.getUTCDate() + index,
       )
 
       /*
@@ -375,14 +383,14 @@ export function buildContributionCalendar(
   for (let week = 0; week < weeks; week += 1) {
     const weekStart = new Date(gridStart)
 
-    weekStart.setDate(
-      weekStart.getDate() + week * 7,
+    weekStart.setUTCDate(
+      weekStart.getUTCDate() + week * 7,
     )
 
     const weekEnd = new Date(weekStart)
 
-    weekEnd.setDate(
-      weekEnd.getDate() + 6,
+    weekEnd.setUTCDate(
+      weekEnd.getUTCDate() + 6,
     )
 
     /*
@@ -398,8 +406,8 @@ export function buildContributionCalendar(
     const visibleDate =
       weekStart < start ? start : weekStart
 
-    const month = visibleDate.getMonth()
-    const year = visibleDate.getFullYear()
+    const month = visibleDate.getUTCMonth()
+    const year = visibleDate.getUTCFullYear()
 
     const previous = months.at(-1)
 
@@ -413,6 +421,7 @@ export function buildContributionCalendar(
           'en-US',
           {
             month: 'short',
+            timeZone: 'UTC',
           },
         ).format(visibleDate),
         month,
@@ -426,6 +435,9 @@ export function buildContributionCalendar(
    * Total only includes the actual rolling 365 days.
    * Null padding cells contribute zero.
    */
+  // A rolling year can touch 13 months; omit the partial first month's label.
+  if (months.length > 12) months[0].label = ''
+
   const total = cells.reduce(
     (sum, cell) => sum + (cell?.count ?? 0),
     0,
