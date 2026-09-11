@@ -6,11 +6,13 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js'
 import { Vector2 } from 'three'
 
-export default function CoreEffects() {
+export default function CoreEffects({ reducedMotion }) {
   const { gl, scene, camera, size, viewport, invalidate } = useThree()
   const composer = useRef()
 
   useEffect(() => {
+    // Small screens and reduced motion use the renderer directly, without bloom targets.
+    if (size.width < 760 || reducedMotion) return
     const effects = new EffectComposer(gl)
     const render = new RenderPass(scene, camera)
     // Purple has low luminance; keep the threshold below its textured emission.
@@ -30,7 +32,7 @@ export default function CoreEffects() {
       output.dispose()
       effects.dispose()
     }
-  }, [gl, scene, camera, size.width, size.height, viewport.dpr, invalidate])
+  }, [gl, scene, camera, size.width, size.height, viewport.dpr, invalidate, reducedMotion])
 
   useFrame(() => {
     if (composer.current) composer.current.render()

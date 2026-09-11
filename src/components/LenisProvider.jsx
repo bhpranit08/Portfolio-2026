@@ -9,7 +9,8 @@ export default function LenisProvider({ children }) {
   const [store] = useState(createAnimationState)
 
   useEffect(() => {
-    const lenis = new Lenis({ autoRaf: false, anchors: true, lerp: 0.085, respectReducedMotion: true })
+    const lenis = new Lenis({ autoRaf: false, lerp: 0.085, respectReducedMotion: true })
+    store.setLenis(lenis)
     const syncScroll = () => store.updateScroll(lenis)
     const unsubscribe = lenis.on('scroll', syncScroll)
     syncScroll()
@@ -31,11 +32,23 @@ export default function LenisProvider({ children }) {
       store.updatePointer(event.clientX / window.innerWidth * 2 - 1, 1 - event.clientY / window.innerHeight * 2, performance.now())
     }
     const resetPointer = () => store.updatePointer(0, 0, performance.now())
+    const navigate = (event) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+      const link = event.target.closest('a[href^="#"]')
+      const target = link && document.getElementById(link.getAttribute('href').slice(1))
+      if (!target || link.target || link.hasAttribute('download')) return
+      event.preventDefault()
+      lenis.scrollTo(target, { onComplete: () => {
+        window.history.pushState(null, '', link.getAttribute('href'))
+        target.focus({ preventScroll: true })
+      } })
+    }
     const releaseKeyboardScroll = (event) => {
       if (event.defaultPrevented || event.target.closest('input, textarea, select, [contenteditable="true"]')) return
       if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) lenis.reset()
     }
     window.addEventListener('pointermove', pointer, { passive: true })
+    window.addEventListener('click', navigate)
     window.addEventListener('keydown', releaseKeyboardScroll)
     window.addEventListener('blur', resetPointer)
     document.documentElement.addEventListener('pointerleave', resetPointer)
@@ -55,7 +68,9 @@ export default function LenisProvider({ children }) {
       resize.disconnect()
       window.removeEventListener('resize', measure)
       lenis.destroy()
+      store.setLenis(null)
       window.removeEventListener('pointermove', pointer)
+      window.removeEventListener('click', navigate)
       window.removeEventListener('keydown', releaseKeyboardScroll)
       window.removeEventListener('blur', resetPointer)
       document.documentElement.removeEventListener('pointerleave', resetPointer)

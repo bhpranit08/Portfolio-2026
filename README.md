@@ -1,106 +1,117 @@
-# PS//2026 — portfolio foundation
+# PS//2026 — Digital Systems
 
-Run `npm run dev`. This is the visual shell and placeholder content, not the finished portfolio.
-
-## Structure
-
-- `src/App.jsx`: seven independently replaceable sections inside the global provider.
-- `src/components/LenisProvider.jsx`: one Lenis instance and one owned RAF loop, cleaned up on unmount (including React Strict Mode).
-- `src/components/Section.jsx`: shared semantic section frame.
-- `src/components/ContributionGraph.jsx`: accessible calendar table and intensity legend.
-- `src/sections/`: Hero, About, Activity, Work, Stack, Lab, Contact.
-- `src/data/sections.js`: placeholder section copy.
-- `src/data/contributions.js`: dated sample records and calendar layout.
-- `src/three/`: persistent scene, existing CORE, material treatment, and bloom.
-- `src/hooks/`: shared animation state, subscription hooks, reduced-motion preference.
-- `src/animations/useHeroAnimations.js`: the hero entrance timeline and imperative DOM scroll response. `usePageAnimations.js` retains the existing section reveals.
-- `src/styles/global.css`: responsive brutalist shell, graph, and accessibility styles.
-
-## Shared input and Lenis
-
-`useAnimationState()` returns a stable store. Read `store.state` inside an R3F `useFrame`, or use `useAnimationFrame(callback)` for imperative DOM updates. Subscriptions run once per provider frame and return an unsubscribe function. These updates do not set React state.
-
-```js
-const store = useAnimationState()
-// store.state:
-// scroll: vertical pixels
-// progress: clamped 0–1 across the whole document (0 if it cannot scroll)
-// velocity: Lenis's native scroll velocity
-// mouse: { x, y, velocityX, velocityY }
-//   x/y: viewport-normalized coordinates, positive y points upward
-//   velocities: normalized units/second with decay
-// idleTime: seconds since pointer movement or scroll activity
-```
-
-Lenis owns smooth wheel scrolling and same-page anchors, using its native reduced-motion support. Touch and keyboard scrolling remain native; navigation keys cancel unfinished wheel easing before the browser handles them. The provider feeds Lenis from its RAF loop (`autoRaf: false`), synchronizes resize-dependent progress, tracks pointer input over the DOM, and cancels all work on cleanup. No second Lenis instance is created for the canvas or sections.
-
-## CORE interface
-
-`Gyroscope` accepts `position`, `rotation`, `scale`, `mouseInfluence`, `reducedMotion`, and a mutable `controls` object (`intro`, `active`, `progress`, `velocity`). Its optional React ref exposes:
-
-- `current.group`: outer transforms, independent of idle/mouse motion.
-- `current.model`: cloned hierarchy; named nodes are available through `getObjectByName`.
-- `current.input`: the live shared state described above.
-- `current.controls`: the current section control object. Named `core-root` and `core-motion` groups keep external and procedural transforms separate.
-
-Scroll progress/velocity, mouse velocity, and global idle time remain available for future choreography. `state.hero` contains the first section’s normalized, damped controls. `hero-motion.js` derives them from the existing Lenis state and measured hero bounds; `wake` and `exit` phase values synchronize DOM and 3D. No other section choreography is implemented.
-
-One fixed, transparent Canvas persists across the whole document. It renders above the existing opaque section backgrounds and below DOM content. Camera view offsets compose the CORE beside the desktop headline and below it on narrow screens. There is no hero-intersection visibility cutoff: the machine remains visible after the hero and keeps its final pose until a later transition is explicitly designed. Reduced motion uses demand rendering; normal motion continues while the machine is visible.
-
-## Contribution data
-
-Replace `contributions` with records shaped like `{ date: '2026-01-01', count: 4 }` and set `contributionYear`. Missing days are zero. Invalid dates, negative/fractional counts, and duplicate dates are rejected. Records outside the displayed year are ignored. Month/week alignment uses UTC, handles leap years, and supports 53/54-week grids. Counts map to five intensity levels: 0, 1–3, 4–6, 7–9, 10+.
-
-The graph uses a real table with seven weekday rows, twelve month headings, square CSS cells, per-day labels, a total, and a LESS/MORE legend. On narrow screens only the graph scrolls horizontally. All activity is explicitly labelled placeholder data; no API requests, embeds, or images.
-
-## Animation and performance
-
-Anime.js scopes clean up transforms and observers on unmount or preference changes. `[data-hero-line]` and `[data-reveal]` are the initial animation hooks; future text, grid, and navigation work can extend this module. Content stays readable without animation. No extra animation framework is included.
-
-Scroll and mouse changes mutate stable objects instead of triggering React renders. The graph is memoized. Canvas DPR is capped at 1.5 on desktop and 1.25 on mobile, environment reflections are captured once at 128px, and particles use one GPU point cloud (45 particles). No shadow maps or remote environment assets. Bloom still adds GPU work; target-device frame-rate profiling remains necessary. Vite reports a large Three.js bundle; code splitting is deferred until the content/loading strategy is established.
-
-## Asset
-
-`useGLTF('/models/gyroscope.glb')` preserves this hierarchy:
-
-```text
-Sketchfab_model
-└─ eneergy_core_1_low.fbx
-   └─ RootNode
-      └─ energy_core_1_low
-         └─ energy_core_1_low_Material_0 (mesh)
-```
-
-The GLB has one mesh (8,708 triangles), one double-sided PBR material named `Material`, four embedded textures, and no animation clips. Rings/core/frame are baked into one mesh and cannot be transformed independently. The asset file, geometry, and texture data remain unchanged. Runtime materials are cloned for neutral metal and purple emission using the original texture brightness as a mask.
-
-Embedded credits: [Sci Fi Energy Core 1](https://sketchfab.com/3d-models/sci-fi-energy-core-1-a5aefe7b281f46529aed2ec9d873bc52) by [FilipZelinka](https://sketchfab.com/FilipZelinka), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Runtime appearance changes: neutral metal and purple emission.
-
-## Checks
+Pranit Bhandari’s brutalist software laboratory. Seven sections share one persistent CORE, one scrolling owner, and a restrained visual system. Project, experiment, profile, technology, and contact content remains intentionally editable.
 
 ```sh
-npm run build
-npm run lint
+npm run dev
 npm test
+npm run lint
+npm run build
+npm run preview
 ```
 
-Checks cover calendar alignment, leap years, input validation, shared state/subscriptions, hero scroll/velocity damping, intro gating, bounded motion, energy settling, and preservation of original material maps.
+## Content
 
-## Hero interaction pass
+| Section | Content source | Presentation |
+| --- | --- | --- |
+| 01 / HERO | `src/sections/Hero.jsx` | Original headline/composition, sequenced entrance, scroll wake |
+| 02 / ABOUT | `src/data/sections.js` | Large statement and technical profile |
+| 03 / ACTIVITY | `src/data/contributions.js` | Public GitHub activity; accessible calendar table |
+| 04 / WORK | `src/data/projects.js` | Three editorial project records |
+| 05 / STACK | `src/data/stack.js` | Editable technology index; no ratings |
+| 06 / LAB | `src/data/lab.js` | Six native expandable experiment records |
+| 07 / CONTACT | `src/data/contact.js` | System completion, project action, public GitHub link |
 
-The resting layout, headline, and palette are preserved. One Anime.js timeline introduces the wordmark (0ms), status (140ms), metadata (280ms), CORE fade (420ms), clipped headline lines (650ms, staggered 110ms), supporting text (1350ms), technical captions (1510ms), and scroll indicator (1750ms). Normal CORE idle/mouse motion starts when the timeline finishes at about 2200ms. The DOM intro never waits on asset loading; a late CORE still fades in when ready. Restored scroll positions skip the intro, and reduced motion displays the resting composition immediately.
+Section titles and supporting notes live in `src/data/sections.js`, which also supplies the navigation index. The name field, projects, experiments, and technology selection are placeholders; they are not claims of experience. No employers, metrics, awards, clients, or detailed project histories have been invented.
 
-`three/motion.js` adds slow bounded tilt, tiny position drift, heavy mouse damping, and approximately 2% emissive breathing. The wake phase turns the CORE by 0.35 radians, increases its model scale to 1.12, shifts its position, and pushes the camera in by 10%. The exit phase continues to 1 radian of yaw, adds tilt/roll, moves the composition toward the lower center, and settles model scale at 0.8. This pose holds after the hero. Signed velocity adds up to 0.14 radians of yaw plus roll, a small scale boost, and up to 0.35 extra emissive intensity. Velocity settles toward the current scroll pose instead of resetting to the initial hero. The same 45 particles expand, rotate faster, and brighten with speed. No material transparency, geometry edits, new models, or extra canvases are used.
+Each project supports `number`, `title`, `description`, `technologies`, `year`, `status`, optional `url`, optional `image` (a path/URL), and optional `caseStudy` (a link). Missing destinations produce ordinary headings rather than broken links. Optional images lazy-load and hide on failure. Experiment records accept an optional demo `url`.
 
-`three/CoreStage.jsx` owns camera framing, the canvas fade, and atmosphere response. Desktop framing is roughly 15% larger, while tablet/mobile retain a smaller object to protect the headline. The postprocessing effect invalidates after resize so demand-mode canvases draw their newly allocated targets.
+Set `contact.destination` to a real `mailto:` or `https:` URL to activate the project link. Until then, START A PROJECT expands an honest destination-pending message, with the real GitHub profile available separately. Set About values and the Stack list to your own details before publishing.
 
-The headline shifts up to 88px left and 140px upward, fading during exit; supporting UI shifts up to 48px. Scroll variables live on the hero wrapper, separate from Anime.js transforms. The arrow drifts 4px only after the intro and its wrapper fades as scrolling begins; keyboard focus keeps the link visible. Subscriptions, the ResizeObserver, and Anime.js scopes are cleaned up. DOM writes stop once the rounded scroll pose settles.
+## Scrolling and navigation
 
-Browser checks cover intro sequencing, scroll indicator fading/return, preference changes, and desktop/tablet/mobile composition. Frame-rate measurements in the software WebGL environment are not representative of target hardware.
+`src/components/LenisProvider.jsx` owns the only Lenis instance and its RAF loop. It publishes scroll, normalized page progress, velocity, pointer input, and measured section stops through the stable mutable store in `src/hooks/animation-state.js`. ResizeObserver updates section positions when the viewport, Activity data, or disclosure heights change. High-frequency input does not use React state.
 
-## Continuous hero handoff
+`Navigation.jsx` uses a native modal `<dialog>` for focus trapping, an inert background, Escape support, and focus restoration. Anime.js handles opening/closing. The menu stops the existing Lenis instance while open, resumes it on close, and uses that same instance to scroll to the selected section and focus it. Same-page anchors also use Lenis. All listeners, observers, and animation scopes have cleanup.
 
-Progress is `clamp((sharedScroll - heroStart) / heroHeight, 0, 1)`, with time-based damping. Smoothstep phases provide an initial wake-up from 2.5% to 20%, followed by the exit from 20% to 100%. The baseline pose is therefore determined by progress, with separate bounded idle/mouse/velocity offsets. The original intro controls canvas opacity; scroll never fades or hides the machine.
+## CORE architecture
 
-The previous disappearance had two causes: `GlobalScene` hid itself via a hero IntersectionObserver, and section backgrounds occluded its layer. Removing that cutoff and placing the transparent scene between section backgrounds and content preserves the existing layout and colors while keeping the handoff visible.
+`App.jsx` lazy-loads `GlobalScene.jsx`, keeping Three.js outside the initial UI chunk. There is exactly one persistent R3F Canvas and one gyroscope asset. `SceneBoundary.jsx` protects the rest of the page from scene or scene-chunk failure; Canvas has an unsupported-browser fallback and the model has a loading readout.
 
-Rendered browser checkpoints were checked at 0%, 10%, 20%, 60%, 100%, and 130% of hero height. They verify the same canvas, full post-intro opacity, transparent clear alpha, a visibly changed wake pose, and a persistent exit pose. The software renderer was stepped deterministically for captures; target-hardware frame-rate profiling remains outstanding. Later sections intentionally have no additional pose or disappearance timeline yet.
+`src/three/core-timeline.js` contains the seven poses. Each pose specifies viewport-relative position, rotation, scale, camera offset, energy, and particle intensity, plus mobile overrides. Section anchors come from measured document geometry; interpolation uses normalized section progress, a smooth transition curve, and a small travel arc. The first scroll adds a bounded wake in rotation, scale, height, camera, and energy that returns to the shared path before About. Only the final Contact interval fades the CORE.
+
+`CoreStage.jsx` samples those targets and updates refs in the R3F frame loop. Position and scale use time-based damping; rotation uses quaternion interpolation. `Gyroscope.jsx` applies additive, bounded idle drift, heavy pointer response, and signed velocity motion via `motion.js`. Faster scrolling increases the small additive tilt, scale, energy, and particle response; those values settle when scrolling stops. The model stays mounted through every section.
+
+The machine occupies the hero’s approved composition, the About side space, an Activity corner, the Work margin, and the open left areas beside Stack and Lab. Lab has the strongest energy state. Mobile uses smaller corner poses with opaque content regions behind dense indexes so text stays readable.
+
+## Public GitHub contributions
+
+Activity requests the current UTC calendar year for `bhpranit08` from the hosted [GitHub Contributions API](https://github.com/grubersjoe/github-contributions-api), a public profile-calendar scraper. The browser calls it directly. No GitHub token, authentication, environment variable, backend, or serverless proxy is needed.
+
+`contributions.js` isolates the response format, validates records, and returns `{ date: 'YYYY-MM-DD', count: number }`. `buildContributionCalendar()` calculates totals, five intensity levels, UTC month/week alignment, and leap-year layouts. It rejects invalid dates, negative/fractional counts, and duplicates. Upstream totals and intensity values are not trusted as presentation data.
+
+`useGithubContributions.js` supplies loading, live, and fallback states. In-flight requests are shared, successful results remain in memory for one hour, and a ten-second timeout prevents indefinite loading. Network, HTTP, JSON, and validation failures use the original 2026 sample, explicitly labelled LOCAL SAMPLE / FALLBACK. The graph mounts after records resolve so the entrance counts to the final value once.
+
+The existing `ContributionGraph.jsx` table retains seven weekday rows, twelve month labels, square cells, five purple intensity levels, LESS/MORE legend, a calculated total, and a technical tooltip. Arrow keys move between dates; Home/End jump to the edges; Escape dismisses the tooltip. Only the graph scrolls horizontally on narrow screens.
+
+## DOM motion and accessibility
+
+Anime.js owns hero, About, Activity, menu, section metadata/headings, project entrances, Lab disclosure entrances, and the Contact reveal. There is no GSAP or separate per-section scrolling system. CSS provides restrained hover feedback. Native links, buttons, summaries, headings, lists, and tables retain their semantics and visible focus outlines. The custom cursor was omitted; native pointers work across mouse and touch devices.
+
+Reduced motion skips decorative DOM entrances, disables hover translations, removes hero parallax and procedural CORE motion, uses demand rendering, and disables bloom. Navigation and all content interactions remain available. CORE section poses still follow the page immediately to retain composition. The graph becomes readable without waiting for animation.
+
+## Responsive and performance decisions
+
+Desktop indexes reserve space for the CORE. Tablet reduces column gaps and moves project metadata below its title. Mobile stacks the indexes, retains large type, reduces CORE scale, and contains calendar overflow. The fullscreen navigation scrolls independently when viewport height is short.
+
+The Canvas caps DPR at 1.5 on desktop and 1.25 on mobile. There are 45 particles on desktop and 18 on mobile; environment reflections render once at 128px. Mobile and reduced-motion views skip bloom. Hidden documents and the open navigation overlay stop the R3F frame loop; the final fully faded Contact pose uses demand rendering and resumes when scrolling back. Scroll and pointer input mutate refs rather than rendering hundreds of cells.
+
+The 3D chunk remains large because it includes Three.js, R3F, Drei, and postprocessing. Code splitting improves initial UI availability but does not eliminate the scene download. Software-rendered browser checks do not establish normal-laptop frame rates; target-device profiling remains a release check.
+
+## Asset and attribution
+
+`public/models/gyroscope.glb` is the original 3.3 MB asset. Its bytes, geometry, textures, and hierarchy are unchanged. It contains one mesh (8,708 triangles), four embedded textures, and no animation clips. The rings are baked together, so the site animates the assembled machine rather than pretending the rings are separate.
+
+Runtime materials preserve the texture maps while converting the base appearance to neutral metal and purple emission. Credits are present in the visible footer: [Sci Fi Energy Core 1](https://sketchfab.com/3d-models/sci-fi-energy-core-1-a5aefe7b281f46529aed2ec9d873bc52) by [FilipZelinka](https://sketchfab.com/FilipZelinka), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Material appearance is adapted.
+
+## Checks and remaining release work
+
+`npm test` covers calendar validation and normalization, request caching/failures, shared input state, first-scroll response, all CORE section destinations, continuous handoffs, Contact fading, motion bounds/settling, and material-map preservation. `npm run lint` and `npm run build` validate the source and production bundle.
+
+Before publishing, replace the marked content, set a real contact destination, and review on target hardware. Public activity depends on a third-party service and can be up to an hour old; its labeled sample fallback is intentional. The existing R3F version emits a Three.Clock deprecation warning in development; it comes from the installed dependency, not a second application clock.
+
+## Completion change map
+
+Created:
+
+- `src/components/Navigation.jsx`, `src/components/SceneBoundary.jsx`
+- `src/data/projects.js`, `src/data/stack.js`, `src/data/lab.js`, `src/data/contact.js`
+
+Updated in the completion pass:
+
+- `src/App.jsx`, `src/components/LenisProvider.jsx`, `src/components/Section.jsx`
+- `src/sections/Hero.jsx`, `Work.jsx`, `Stack.jsx`, `Lab.jsx`, `Contact.jsx`
+- `src/data/sections.js`, `src/hooks/animation-state.js`, `src/animations/usePageAnimations.js`
+- `src/three/GlobalScene.jsx`, `CoreStage.jsx`, `CoreEffects.jsx`, `core-timeline.js`, `core-timeline.test.js`
+- `src/styles/global.css`, `index.html`, `public/favicon.svg`, `README.md`
+
+The pre-existing public contribution pipeline, Activity presentation, About animation, gyroscope asset/material/motion implementation, package manifest, and lockfile were preserved.
+
+## Browser verification — 2026-09-11
+
+The browser scripts are local verification artifacts in `/tmp` and use the already available Playwright/Chromium installation; no browser-test dependency was added to the portfolio.
+
+| Command | Result |
+| --- | --- |
+| `npm test` | All six test files passed |
+| `npm run lint` | Passed, no lint errors |
+| `npm run build` | Passed; expected warning for the large deferred 3D chunk |
+| `npm run dev -- --host 127.0.0.1` | Development server exercised on port 3001 |
+| `npm run preview -- --host 127.0.0.1` | Production preview exercised on port 4173 |
+| `node /tmp/portfolio-polish-check.mjs` | Passed at 1440×1000, 900×1000, 390×844, and 320×740 with reduced motion; CORE loaded, seven sections, all menu targets, focus handling, disclosures, graph keys, and no page overflow or console errors |
+| `node /tmp/portfolio-production-check.mjs` | Passed against the built mobile site, including the lazy scene, CORE, menu, Activity, and console checks |
+| `node /tmp/portfolio-live-check.mjs` | Fresh real browser request passed: 565 contributions, summed from 365 public records |
+| `node /tmp/portfolio-motion-check.mjs` | Passed at 1100×760 with normal motion: hero entrance, pointer response, first-scroll wake, all six handoffs with the same Canvas, menu animation, Activity entrance with captured public records, Contact fade, reverse scroll, and reduced-motion switching; no console errors |
+| `node /tmp/portfolio-failure-check.mjs` | API failure, timeout, missing model, and failed scene import all left the portfolio and navigation usable |
+
+Desktop and mobile screenshots of all seven sections and the navigation were visually inspected. An earlier normal-motion run encountered a public-data fallback; live networking and animation were subsequently checked separately. Injected network/model failures intentionally produce failed resource requests; the no-console-error result applies to healthy page runs. No physical-device FPS, Safari, or Firefox claim is made.

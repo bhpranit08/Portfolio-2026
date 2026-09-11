@@ -25,7 +25,8 @@ for (const [index, stop] of timeline.stops.entries()) {
 }
 const [hero, about] = timeline.stops
 sample(about.anchor * 0.2)
-assert.deepEqual(target.position, coreStates[0].position, 'A section has a resting interval')
+assert.ok(target.rotation[1] > coreStates[0].rotation[1] + 0.25, 'The first scroll visibly wakes the CORE')
+assert.ok(target.scale > 1.05 && target.camera[2] < -0.04, 'Scale and camera participate in the wake')
 sample(about.anchor * 0.775)
 assert.ok(Math.abs(timeline.progress - 0.775) < 1e-12)
 assert.ok(target.position[1] > (coreStates[0].position[1] + coreStates[1].position[1]) / 2 + 0.06, 'Travel follows a visible arc')

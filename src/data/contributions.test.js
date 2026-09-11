@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
-import { buildContributionCalendar, contributions, contributionYear } from './contributions.js'
+import { test } from 'node:test'
+import { buildContributionCalendar, contributions, contributionYear, fetchGithubContributions, normalizeGithubContributions } from './contributions.js'
 
 const calendar = buildContributionCalendar(contributionYear, contributions)
 assert.equal(calendar.months.length, 12)
@@ -19,3 +20,46 @@ assert.equal(buildContributionCalendar(2000, []).weeks, 54, 'Leap years starting
 assert.throws(() => buildContributionCalendar(2026, [{ date: '2026-02-30', count: 1 }]))
 assert.throws(() => buildContributionCalendar(2026, [{ date: '2026-01-01', count: -1 }]))
 assert.throws(() => buildContributionCalendar(2026, [{ date: '2026-01-01', count: 1 }, { date: '2026-01-01', count: 2 }]))
+
+test('public data is normalized, validated, cached and retryable after failure', async (t) => {
+  const records = [{ date: '2026-01-01', count: 12 }, { date: '2026-01-02', count: 0 }]
+  const payload = { total: { 2026: 9999 }, contributions: records.map((record) => ({ ...record, level: 0 })) }
+  assert.deepEqual(normalizeGithubContributions(payload, 2026), records)
+  assert.equal(buildContributionCalendar(2026, normalizeGithubContributions(payload, 2026)).total, 12, 'Ignore upstream totals and intensity levels')
+  for (const data of [null, {}, { contributions: [] }, { contributions: [null] },
+    { contributions: [{ date: '2026-02-30', count: 1 }] },
+    { contributions: [{ date: '2026-01-01', count: -1 }] },
+    { contributions: [{ date: '2026-01-01', count: 1.5 }] },
+    { contributions: [{ date: '2026-01-01', count: '1' }] },
+    { contributions: [{ date: '2025-01-01', count: 1 }] },
+    { contributions: [records[0], records[0]] },
+  ]) assert.throws(() => normalizeGithubContributions(data, 2026))
+
+  let now = 0
+  t.mock.method(Date, 'now', () => now)
+  const request = t.mock.method(globalThis, 'fetch', async (url, options) => {
+    assert.equal(url, 'https://github-contributions-api.jogruber.de/v4/bhpranit08?y=2026')
+    assert.ok(options.signal instanceof AbortSignal)
+    return { ok: true, json: async () => payload }
+  })
+  const first = fetchGithubContributions(2026)
+  assert.equal(fetchGithubContributions(2026), first, 'Share the in-flight request')
+  assert.deepEqual(await first, records)
+  assert.deepEqual(await fetchGithubContributions(2026), records)
+  assert.equal(request.mock.callCount(), 1)
+  now += 3600001
+  await fetchGithubContributions(2026)
+  assert.equal(request.mock.callCount(), 2, 'Refresh expired data')
+
+  for (const response of [
+    async () => ({ ok: false, status: 503 }),
+    async () => { throw new TypeError('Network unavailable') },
+    async () => { throw new DOMException('Timed out', 'TimeoutError') },
+    async () => ({ ok: true, json: async () => { throw new SyntaxError('Invalid JSON') } }),
+    async () => ({ ok: true, json: async () => ({ contributions: [] }) }),
+  ]) {
+    request.mock.mockImplementation(response)
+    await assert.rejects(fetchGithubContributions(2025))
+  }
+  assert.equal(request.mock.callCount(), 7, 'Failures must not poison the cache')
+})

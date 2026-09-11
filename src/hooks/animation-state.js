@@ -3,6 +3,7 @@ import { createSectionStops, updateSectionProgress } from '../three/core-timelin
 // Stable mutable state: animation consumers read this without React renders.
 export function createAnimationState() {
   const state = {
+    lenis: null, overlayOpen: false,
     scroll: 0, progress: 0, velocity: 0, idleTime: 0,
     mouse: { x: 0, y: 0, velocityX: 0, velocityY: 0 },
     hero: { intro: 0, active: false, progress: 0, velocity: 0, wake: 0, exit: 0 },
@@ -12,6 +13,8 @@ export function createAnimationState() {
   let pointerTime = null
   return {
     state,
+    setLenis(instance) { state.lenis = instance },
+    setOverlayOpen(open) { state.overlayOpen = open },
     setHero(values) { Object.assign(state.hero, values) },
     setSections(sections, viewportHeight, limit) {
       state.timeline.stops = createSectionStops(sections, viewportHeight, limit)

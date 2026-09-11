@@ -9,7 +9,7 @@ export default function Hero() {
   const root = useRef()
   useHeroAnimations(root)
   return (
-    <section ref={root} id="hero" className="hero" aria-labelledby="hero-title">
+    <section ref={root} id="hero" className="hero" aria-labelledby="hero-title" tabIndex={-1}>
       <header className="hero-header">
         <a className="wordmark" href="#hero" aria-label="PS 2026 home">PS<span>//</span>2026</a>
         <span className="system-status"><i aria-hidden="true" />SYSTEM STATUS: ONLINE</span>

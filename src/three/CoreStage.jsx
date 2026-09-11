@@ -7,7 +7,7 @@ import { useAnimationState } from '../hooks/useAnimationState.js'
 import { coreStates, coreTransition, createCoreState, sampleCoreState } from './core-timeline.js'
 
 export default function CoreStage({ reducedMotion }) {
-  const { camera, gl, size, invalidate, setDpr } = useThree()
+  const { camera, gl, size, invalidate, setDpr, setFrameloop } = useThree()
   const store = useAnimationState()
   const core = useRef()
   const particles = useRef()
@@ -38,23 +38,30 @@ export default function CoreStage({ reducedMotion }) {
   }, [camera, size.width, size.height, mobile, invalidate, setDpr])
 
   useEffect(() => {
-    if (!reducedMotion) return
     let previousProgress = -1
     let previousStops
-    return store.subscribe(({ progress, timeline }) => {
+    let previousMode
+    const update = ({ progress, timeline, overlayOpen }) => {
+      const mode = document.hidden || overlayOpen ? 'never' : reducedMotion || progress === 1 ? 'demand' : 'always'
+      if (mode !== previousMode) { setFrameloop(mode); previousMode = mode; invalidate() }
       if (progress === previousProgress && timeline.stops === previousStops) return
       previousProgress = progress
       previousStops = timeline.stops
       invalidate()
-    })
-  }, [store, reducedMotion, invalidate])
+    }
+    const visibility = () => { previousProgress = -1; update(store.state) }
+    const unsubscribe = store.subscribe(update)
+    document.addEventListener('visibilitychange', visibility)
+    update(store.state)
+    return () => { unsubscribe(); document.removeEventListener('visibilitychange', visibility) }
+  }, [store, reducedMotion, invalidate, setFrameloop])
 
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.05)
     const { hero, timeline, progress, velocity } = store.state
     const stage = rig.current
     const target = sampleCoreState(stage.target, timeline, progress, mobile)
-    const blend = reducedMotion || !stage.ready ? 1 : 1 - Math.exp(-coreTransition.damping * dt)
+    const blend = reducedMotion || progress === 1 || !stage.ready ? 1 : 1 - Math.exp(-coreTransition.damping * dt)
     const height = 2 * stage.baseZ * Math.tan(MathUtils.degToRad(camera.fov / 2))
     const width = height * size.width / size.height
     const origin = mobile ? coreStates[0].mobile.position : coreStates[0].position
@@ -74,7 +81,7 @@ export default function CoreStage({ reducedMotion }) {
     stage.controls.intro = hero.intro
     stage.controls.energy = MathUtils.lerp(stage.controls.energy, target.energy * 3, blend)
     stage.controls.velocity = reducedMotion ? 0 : MathUtils.damp(stage.controls.velocity, MathUtils.clamp(velocity / 45, -1, 1), 5, dt)
-    stage.fade = reducedMotion ? target.opacity : MathUtils.damp(stage.fade, hero.intro * target.opacity, 6, dt)
+    stage.fade = reducedMotion || progress === 1 ? target.opacity : MathUtils.damp(stage.fade, hero.intro * target.opacity, 6, dt)
     const opacityValue = stage.fade > 0.999 ? '1' : stage.fade.toFixed(4)
     if (gl.domElement.style.opacity !== opacityValue) gl.domElement.style.setProperty('opacity', opacityValue)
     const field = particles.current
@@ -98,7 +105,7 @@ export default function CoreStage({ reducedMotion }) {
   return (
     <>
       <Gyroscope ref={core} controls={controls} rotation={coreStates[0].rotation} reducedMotion={reducedMotion} />
-      <Sparkles ref={particles} count={45} scale={[4, 2.7, 2.5]} size={0.65} opacity={0.12} color="#b3adb9" speed={reducedMotion ? 0 : 0.08} />
+      <Sparkles ref={particles} count={mobile ? 18 : 45} scale={[4, 2.7, 2.5]} size={0.65} opacity={0.12} color="#b3adb9" speed={reducedMotion ? 0 : 0.08} />
     </>
   )
 }
