@@ -7,7 +7,7 @@ export default function Activity() {
   const activity = useGithubContributions()
   return (
     <section id={id} className="section section-activity" aria-labelledby="activity-title" tabIndex={-1} data-section-progress="0">
-      <div className="section-meta" data-activity-meta><span>{number} / {label}</span><span>PS—2026 / INDEX {number}</span></div>
+      <div className="section-meta" data-activity-meta><span>{number} / {label}</span><span>PB—2026 / CHAPTER {number}</span></div>
       <div className="activity-heading">
         <h2 id="activity-title"><span className="text-clip"><span data-activity-title>{title}</span></span></h2>
         <p data-activity-meta>{note}</p>

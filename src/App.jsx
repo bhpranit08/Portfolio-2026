@@ -2,6 +2,9 @@ import { lazy, Suspense, useRef } from 'react'
 import LenisProvider from './components/LenisProvider.jsx'
 import Navigation from './components/Navigation.jsx'
 import SceneBoundary from './components/SceneBoundary.jsx'
+import SceneFallback from './components/SceneFallback.jsx'
+import MotionToggle from './components/MotionToggle.jsx'
+import { useAnimationState } from './hooks/useAnimationState.js'
 import Hero from './sections/Hero.jsx'
 import About from './sections/About.jsx'
 import Activity from './sections/Activity.jsx'
@@ -15,18 +18,20 @@ const GlobalScene = lazy(() => import('./three/GlobalScene.jsx'))
 
 function Portfolio() {
   const page = useRef()
+  const store = useAnimationState()
   usePageAnimations(page)
   return (
     <>
       <a className="skip-link" href="#about">Skip introduction</a>
       <Navigation />
-      <SceneBoundary><Suspense fallback={<div className="global-scene"><p className="scene-status" role="status">INITIALIZING CORE…</p></div>}><GlobalScene /></Suspense></SceneBoundary>
+      <MotionToggle />
+      <SceneBoundary onFailure={() => store.setSceneStatus('unavailable')} fallback={<SceneFallback failed />}><Suspense fallback={<SceneFallback />}><GlobalScene /></Suspense></SceneBoundary>
       <main ref={page}>
         <Hero />
         <About />
-        <Activity />
         <Work />
         <Stack />
+        <Activity />
         <Lab />
         <Contact />
       </main>

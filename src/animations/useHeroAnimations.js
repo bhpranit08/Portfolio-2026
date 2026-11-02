@@ -34,11 +34,11 @@ export default function useHeroAnimations(root) {
         .add('.wordmark', { opacity: [0, 1], y: [-5, 0] }, 0)
         .add('.system-status', { opacity: [0, 1] }, 140)
         .add('.eyebrow', { opacity: [0, 1], y: [6, 0] }, 280)
-        .add(hero, { intro: [0, 1], duration: 850 }, 420)
-        .add('[data-hero-line]', { y: ['105%', '0%'], duration: 750, delay: stagger(110) }, 650)
-        .add('.hero-description', { opacity: [0, 1], y: [8, 0] }, 1350)
-        .add('.core-caption, .hero-footer > span', { opacity: [0, 1] }, 1510)
-        .add('.hero-enter a', { opacity: [0, 1], y: [5, 0], duration: 450 }, 1750)
+        .add(hero, { intro: [0, 1], duration: 700 }, 420)
+        .add('[data-hero-line]', { y: ['105%', '0%'], duration: 620, delay: stagger(80) }, 380)
+        .add('.hero-description', { opacity: [0, 1], y: [8, 0] }, 1000)
+        .add('.core-caption, .hero-footer > span', { opacity: [0, 1] }, 1150)
+        .add('.hero-enter a', { opacity: [0, 1], y: [5, 0], duration: 350 }, 1300)
     })
     let previousProgress = -1
     const unsubscribe = store.subscribe((input, delta) => {

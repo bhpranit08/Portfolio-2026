@@ -1,14 +1,18 @@
 import assert from 'node:assert/strict'
-import { MeshStandardMaterial, Texture, ShaderLib } from 'three'
-import { createCoreMaterial } from './core-material.js'
+import { createReactorResources } from './core-material.js'
 
-const source = new MeshStandardMaterial({ map: new Texture(), emissiveMap: new Texture(), normalMap: new Texture(), roughnessMap: new Texture(), metalnessMap: new Texture(), aoMap: new Texture() })
-const core = createCoreMaterial(source)
-assert.notEqual(core, source)
-assert.equal(source.color.getHexString(), 'ffffff', 'Cached source material remains untouched')
-for (const map of ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap']) assert.equal(core[map], source[map], 'Original textures are preserved')
-const shader = { fragmentShader: ShaderLib.standard.fragmentShader }
-core.onBeforeCompile(shader)
-assert.ok(shader.fragmentShader.includes('totalEmissiveRadiance *= dot(emissiveColor.rgb'), 'Original emissive brightness masks the purple color')
-assert.ok(shader.fragmentShader.includes('diffuseColor.rgb = vec3(dot('), 'Base texture detail becomes neutral')
-assert.equal(core.emissive.getHexString(), '8b3dff')
+const resources = createReactorResources()
+let triangles = 0
+for (const geometry of Object.values(resources.geometry)) {
+  geometry.computeBoundingBox()
+  assert.ok(geometry.boundingBox.min.toArray().every(Number.isFinite), 'Procedural geometry has finite bounds')
+  triangles += (geometry.index?.count ?? geometry.attributes.position.count) / 3
+}
+assert.ok(triangles < 18000, 'The shared mechanical geometry stays within a small triangle budget')
+assert.ok(resources.material.metal.metalness > 0.9, 'The housings use environment reflections')
+assert.equal(resources.material.energy.emissive.getHexString(), '9e64ff')
+assert.ok(resources.geometry.casing.boundingBox.min.z < 0 && resources.geometry.casing.boundingBox.max.z > 0, 'The casing is centered before assembly')
+let disposed = 0
+for (const item of [...Object.values(resources.geometry), ...Object.values(resources.material)]) item.addEventListener('dispose', () => disposed++)
+resources.dispose()
+assert.equal(disposed, Object.keys(resources.geometry).length + Object.keys(resources.material).length, 'Every owned GPU resource has a disposal path')

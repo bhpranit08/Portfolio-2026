@@ -3,9 +3,10 @@ import { Component } from 'react'
 export default class SceneBoundary extends Component {
   state = { failed: false }
   static getDerivedStateFromError() { return { failed: true } }
+  componentDidCatch() { this.props.onFailure?.() }
   render() {
     return this.state.failed
-      ? <div className="global-scene"><p className="scene-status" role="status">CORE unavailable. The portfolio is still online.</p></div>
+      ? this.props.fallback
       : this.props.children
   }
 }

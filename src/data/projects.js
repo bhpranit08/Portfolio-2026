@@ -1,6 +1,42 @@
-// Replace these records with real work. Empty destinations never become links.
 export const projects = [
-  { number: '01', title: 'PROJECT PLACEHOLDER', description: 'A short project description goes here.', technologies: ['[TECH]', '[STACK]'], year: '2026', status: 'PLACEHOLDER', url: null, image: null, caseStudy: null },
-  { number: '02', title: 'PROJECT PLACEHOLDER', description: 'A short project description goes here.', technologies: ['[TECH]', '[STACK]'], year: '2026', status: 'PLACEHOLDER', url: null, image: null, caseStudy: null },
-  { number: '03', title: 'PROJECT PLACEHOLDER', description: 'A short project description goes here.', technologies: ['[TECH]', '[STACK]'], year: '2026', status: 'PLACEHOLDER', url: null, image: null, caseStudy: null },
+  {
+    number: '01', title: 'Purple Star DMS', category: 'BUSINESS, CONNECTED.',
+    description: 'The work behind the business. An operational platform connecting stock, sales, service, finance, and the people moving it all forward.',
+    details: ['Independent importer and dealer workspaces.', 'Inventory, customer journeys, service, and reporting in one system.'],
+    technologies: ['React', 'Node.js', 'Express', 'MongoDB'], year: '2026', status: 'FULL-STACK PRODUCT',
+    url: 'https://purplestarsystems.com/', repositoryUrl: null,
+    image: '/projects/purple-star.png', imageAlt: 'An archived Purple Star public website screenshot introducing the inventory management platform.', imageLabel: 'PUBLIC WEBSITE / ARCHIVED CAPTURE', accent: '#b298ff',
+  },
+  {
+    number: '02', title: 'Smart Monkey Detection', category: 'CODE MEETS THE FIELD.',
+    description: 'A camera, a little intelligence, and an early warning. A hardware-to-mobile detection pipeline designed to help protect farms from monkeys.',
+    details: ['ESP32 images enhanced with OpenCV and analyzed with Groq vision.', 'Positive detections trigger a buzzer and an Expo mobile alert.'],
+    technologies: ['Python', 'OpenCV', 'ESP32', 'React Native', 'Expo'], year: '2026', status: 'AI + HARDWARE PROTOTYPE',
+    url: null, repositoryUrl: 'https://github.com/bhpranit08/monkey-detection-system',
+    image: '/projects/monkey-detection.svg', imageAlt: 'Illustrated detection pipeline connecting an ESP32 camera, vision processing, and a mobile alert.', imageLabel: 'SYSTEM FLOW / ILLUSTRATION', accent: '#b8dd96',
+  },
+  {
+    number: '03', title: 'Kids Universe Hub', category: 'A SMALLER WORLD. MORE POSSIBILITY.',
+    description: 'A home for children’s products and services. Bringing the storefront, sellers, and content team together behind one playful platform.',
+    details: ['Seller applications and inventory management.', 'Admin product review, publishing, and editable site content.'],
+    technologies: ['React', 'Node.js', 'Express', 'MongoDB'], year: '2026', status: 'MARKETPLACE + CMS',
+    url: null, repositoryUrl: null,
+    image: '/projects/kids-universe.svg', imageAlt: 'Illustrated marketplace workflow linking a product catalog, seller workspace, and admin publishing controls.', imageLabel: 'PLATFORM CONCEPT / ILLUSTRATION', accent: '#f4b994',
+  },
+  {
+    number: '04', title: 'Power Track', category: 'MAKE THE INVISIBLE VISIBLE.',
+    description: 'When the lights go out, information matters. A community-powered way to report outages, verify what’s happening, and see the bigger picture.',
+    details: ['Location-based reports and community verification.', 'An interactive Leaflet map with status and date filters.'],
+    technologies: ['React', 'TypeScript', 'Leaflet', 'Express', 'MongoDB'], year: '2026', status: 'COMMUNITY MAPPING APP',
+    url: null, repositoryUrl: 'https://github.com/bhpranit08/Load-shedding-tracker-app',
+    image: '/projects/power-track.svg', imageAlt: 'A schematic outage map with illustrative report markers and a reporting, verification, and resolution flow.', imageLabel: 'MAP CONCEPT / ILLUSTRATION', accent: '#83d8d1',
+  },
+  {
+    number: '05', title: 'ConnectAble', category: 'MORE WAYS TO BELONG.',
+    description: 'Exploring a more inclusive web. A frontend prototype bringing accessible job discovery, communities, fundraising, and AI assistance into one place.',
+    details: ['Jobs, community discussions, and campaign interfaces.', 'Demonstration listings and community data are locally defined.'],
+    technologies: ['React', 'Tailwind CSS', 'Gemini'], year: '2025', status: 'FRONTEND PROTOTYPE',
+    url: null, repositoryUrl: 'https://github.com/bhpranit08/ConnectAble',
+    image: '/projects/connectable.png', imageAlt: 'ConnectAble prototype home screen with job discovery, communities, and fundraising. Displayed figures are demonstration data.', imageLabel: 'PROTOTYPE SCREEN / DEMONSTRATION DATA', accent: '#a6b8ff',
+  },
 ]

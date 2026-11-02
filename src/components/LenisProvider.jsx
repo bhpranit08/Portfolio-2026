@@ -18,6 +18,8 @@ export default function LenisProvider({ children }) {
     const measure = () => {
       lenis.resize()
       syncScroll()
+      const lab = document.querySelector('.lab-viewport')?.getBoundingClientRect()
+      store.state.labAnchor = lab ? { top: lab.top + lenis.actualScroll, left: lab.left, width: lab.width, height: lab.height } : null
       store.setSections(sections.map((section) => ({
         id: section.id, top: section.getBoundingClientRect().top + lenis.actualScroll,
       })), window.innerHeight, lenis.limit)
@@ -38,7 +40,7 @@ export default function LenisProvider({ children }) {
       const target = link && document.getElementById(link.getAttribute('href').slice(1))
       if (!target || link.target || link.hasAttribute('download')) return
       event.preventDefault()
-      lenis.scrollTo(target, { onComplete: () => {
+      lenis.scrollTo(target, { immediate: !store.state.motionEnabled || window.matchMedia('(prefers-reduced-motion: reduce)').matches, onComplete: () => {
         window.history.pushState(null, '', link.getAttribute('href'))
         target.focus({ preventScroll: true })
       } })
@@ -55,6 +57,7 @@ export default function LenisProvider({ children }) {
     let frame
     let previous
     const tick = (time) => {
+      lenis.options.smoothWheel = store.state.motionEnabled && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
       lenis.raf(time)
       syncScroll()
       store.tick(previous === undefined ? 0 : (time - previous) / 1000)

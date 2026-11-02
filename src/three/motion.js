@@ -1,5 +1,20 @@
 import { MathUtils } from 'three'
 
+const ringRotations = [[0.8, -0.3, -0.25], [-0.65, 0.65, 0.4], [0.35, 1.25, -0.6]]
+
+export function updateRingPose(target, index, phase, separation, intro, reducedMotion) {
+  const spread = separation + (reducedMotion ? 0 : (1 - intro) * 1.1)
+  const offset = index - 1
+  target.position[0] = offset * spread * 0.32
+  target.position[1] = offset * spread * 0.68
+  target.position[2] = offset * spread * 0.36
+  const time = reducedMotion ? 0 : phase
+  target.rotation[0] = ringRotations[index][0] + Math.sin(time * 0.6 + index) * (reducedMotion ? 0 : 0.16)
+  target.rotation[1] = ringRotations[index][1] + (index === 2 ? time * 0.55 : Math.sin(time * 0.5) * 0.2)
+  target.rotation[2] = ringRotations[index][2] + time * (index % 2 ? -0.3 : 0.25)
+  return target
+}
+
 export function updateMotion(state, rotation, pointer, delta, mouseInfluence = 1, controls = {}) {
   const dt = Math.min(delta, 0.05)
   const active = controls.active !== false

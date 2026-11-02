@@ -50,9 +50,9 @@ export default function Navigation() {
     <>
       <button className="menu-toggle" type="button" aria-haspopup="dialog" aria-controls="system-navigation" aria-expanded={open} onClick={() => setOpen(true)}>MENU <span aria-hidden="true">+</span></button>
       <dialog ref={dialog} id="system-navigation" className="navigation-overlay" aria-labelledby="navigation-title" onCancel={(event) => { event.preventDefault(); close() }} data-lenis-prevent>
-        <div className="navigation-header"><span className="wordmark">PS<span>//</span>2026</span><button type="button" className="menu-close" onClick={() => close()} autoFocus>CLOSE <span aria-hidden="true">×</span></button></div>
+        <div className="navigation-header"><span className="wordmark">PB<span>*</span></span><button type="button" className="menu-close" onClick={() => close()} autoFocus>CLOSE <span aria-hidden="true">×</span></button></div>
         <div className="navigation-layout">
-          <div className="navigation-caption"><h2 id="navigation-title" className="technical-label">SYSTEM INDEX</h2><p>FIND YOUR<br />WAY THROUGH.</p><span className="technical-label">SYSTEM ONLINE / SEVEN SECTIONS</span></div>
+          <div className="navigation-caption"><h2 id="navigation-title" className="technical-label">CHAPTER INDEX</h2><p>FIND YOUR<br />WAY THROUGH.</p><span className="technical-label">PRANIT BHANDARI / SEVEN CHAPTERS</span></div>
           <nav aria-label="Main navigation">{navigation.map(({ id, number, label }) => <a className="navigation-link" key={id} href={`#${id}`} onClick={(event) => { event.preventDefault(); close(id) }}><span>{number} /</span>{label}<span aria-hidden="true">↗</span></a>)}</nav>
         </div>
         <p className="navigation-footer technical-label">DEVELOPER PORTFOLIO — V.2026 <span>ESC / CLOSE</span></p>

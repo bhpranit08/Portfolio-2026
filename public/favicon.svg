@@ -1,1 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#080808"/><path d="M13 45 29 19h8L21 45zm17 0 16-26h8L38 45z" fill="#8b3dff"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#090a0d"/><text x="9" y="44" font-family="Arial,sans-serif" font-size="32" font-weight="bold" letter-spacing="-3" fill="#eeece8">PB</text><circle cx="52" cy="14" r="4" fill="#b59aee"/></svg>

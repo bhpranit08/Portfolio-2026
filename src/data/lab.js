@@ -1,8 +1,5 @@
-export const experiments = ['WEBGL', 'PHYSICS', 'GENERATIVE', 'AI', 'SHADERS', 'INTERACTION'].map((category, index) => ({
-  number: String(index + 1).padStart(2, '0'),
-  category,
-  title: 'EXPERIMENT PLACEHOLDER',
-  description: 'An experiment will be documented here. No live demo is attached yet.',
-  status: 'NOT CONNECTED',
-  url: null,
-}))
+export const labModes = [
+  { id: 'assembled', number: '01', title: 'Assembled', description: 'Three independent rings. One orbiting machine. Move your pointer to change your perspective.' },
+  { id: 'exploded', number: '02', title: 'Exploded', description: 'Give every part a little room. The outer housings separate to reveal the energy chamber within.' },
+  { id: 'pulse', number: '03', title: 'Energy pulse', description: 'A brighter center. A slower heartbeat. Watch the energy move through the machine.' },
+]

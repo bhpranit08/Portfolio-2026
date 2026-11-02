@@ -1,21 +1,19 @@
 export const sections = {
-  // About copy is intentionally placeholder content; replace these values together.
   about: {
-    id: 'about', number: '02', label: 'ABOUT', title: 'I DESIGN.\nI BUILD.\nI SHIP.',
+    id: 'about', number: '02', label: 'THE HUMAN', title: 'CURIOUS.\nBY DESIGN.',
+    bio: 'I’m Pranit, a self-taught full-stack developer from Kathmandu. I learn by making things: business software, community platforms, and experiments that connect code to the physical world.',
+    personal: 'Away from the keyboard, you’ll usually find me mountain biking, hiking, or looking for the next trail.',
     fields: [
-      ['NAME', '[YOUR NAME]'],
-      ['ROLE', 'INDEPENDENT DEVELOPER'],
-      ['LOCATION', 'NEPAL'],
-      ['FOCUS', 'PRODUCT / SYSTEMS / WEB'],
-      ['CURRENTLY', 'BUILDING THINGS'],
-      ['STATUS', 'AVAILABLE'],
+      ['BASED IN', 'KATHMANDU, NEPAL'],
+      ['APPROACH', 'LEARN → BUILD → REPEAT'],
+      ['FOCUS', 'FULL-STACK / AI / INTERACTION'],
+      ['BEYOND CODE', 'BIKES, TRAILS & THE OUTDOORS'],
     ],
   },
-  activity: { id: 'activity', number: '03', label: 'ACTIVITY', title: 'DAYS I CODE', note: 'Small inputs. A daily practice.\nOne year at a time.' },
-  work: { id: 'work', number: '04', label: 'WORK', title: 'SELECTED\nOUTPUT.', note: 'Ideas, made tangible.\nProject records / placeholders.' },
-  stack: { id: 'stack', number: '05', label: 'STACK', title: 'TOOLS OF\nTHE TRADE.', note: 'Different tools. One intent.\nAn editable technology index.' },
-  lab: { id: 'lab', number: '06', label: 'LAB', title: 'ROOM FOR THE\nUNFINISHED.', note: 'A place to ask: what if?\nExperimental records / placeholders.' },
-  contact: { id: 'contact', number: '07', label: 'CONTACT', title: 'SYSTEM\nCOMPLETE.', note: 'READY TO BUILD?' },
+  work: { id: 'work', number: '03', label: 'SELECTED WORK', title: 'BUILT FROM\nCURIOSITY.', note: 'Five projects. Different problems.\nThe same urge to figure things out.' },
+  stack: { id: 'stack', number: '04', label: 'THE TOOLKIT', title: 'WHATEVER\nIT TAKES.', note: 'The tools behind the work.\nChosen for the problem in front of me.' },
+  activity: { id: 'activity', number: '05', label: 'THE PRACTICE', title: 'KEEP SHOWING UP.', note: 'A little more, every day.\nMy last year in code.' },
+  lab: { id: 'lab', number: '06', label: 'PLAYGROUND', title: 'YOUR TURN\nAT THE CONTROLS.', note: 'Take the machine apart. Put it back together.\nA small experiment in curiosity.' },
+  contact: { id: 'contact', number: '07', label: 'NEXT CHAPTER', title: 'LET’S BUILD\nSOMETHING.', note: 'An idea, a question, a good problem.\nI’d like to hear it.' },
 }
-
-export const navigation = [{ id: 'hero', number: '01', label: 'HERO' }, ...Object.values(sections)]
+export const navigation = [{ id: 'hero', number: '01', label: 'THE BEGINNING' }, ...Object.values(sections)]

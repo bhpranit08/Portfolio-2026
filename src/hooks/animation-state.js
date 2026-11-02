@@ -4,6 +4,7 @@ import { createSectionStops, updateSectionProgress } from '../three/core-timelin
 export function createAnimationState() {
   const state = {
     lenis: null, overlayOpen: false,
+    motionEnabled: true, sceneStatus: 'loading', activeProject: '01', labMode: 'assembled', labAnchor: null,
     scroll: 0, progress: 0, velocity: 0, idleTime: 0,
     mouse: { x: 0, y: 0, velocityX: 0, velocityY: 0 },
     hero: { intro: 0, active: false, progress: 0, velocity: 0, wake: 0, exit: 0 },
@@ -15,6 +16,10 @@ export function createAnimationState() {
     state,
     setLenis(instance) { state.lenis = instance },
     setOverlayOpen(open) { state.overlayOpen = open },
+    setMotionEnabled(enabled) { state.motionEnabled = enabled; listeners.forEach((callback) => callback(state, 0)) },
+    setSceneStatus(status) { state.sceneStatus = status; listeners.forEach((callback) => callback(state, 0)) },
+    setActiveProject(number) { state.activeProject = number },
+    setLabMode(mode) { state.labMode = mode; listeners.forEach((callback) => callback(state, 0)) },
     setHero(values) { Object.assign(state.hero, values) },
     setSections(sections, viewportHeight, limit) {
       state.timeline.stops = createSectionStops(sections, viewportHeight, limit)

@@ -6,7 +6,7 @@ export default function Stack() {
   return (
     <Section {...sections.stack}>
       <div className="stack-layout">
-        <div className="stack-caption" data-reveal><span className="technical-label">CORE / 001</span><span className="technical-label">NO RATINGS. JUST TOOLS.</span></div>
+        <div className="stack-caption" data-reveal><span className="technical-label">THE RIGHT TOOL.</span><span className="technical-label">FOR THE NEXT WHAT-IF.</span></div>
         <ol className="stack-index">
           {stack.map(({ name, category }, index) => <li key={name} data-reveal><span className="index-number">{String(index + 1).padStart(2, '0')}</span><h3>{name}</h3><span className="technical-label">{category}</span></li>)}
         </ol>

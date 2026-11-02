@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { updateMotion } from './motion.js'
+import { updateMotion, updateRingPose } from './motion.js'
 
 const state = { x: 0, y: 0, still: 0, idle: 0 }
 const rotation = { x: 0, y: 0 }
@@ -43,3 +43,16 @@ assert.ok(pose.y > 0.13 && waiting.energy > 2.1, 'Scroll adds bounded additive r
 controls.velocity = 0
 for (let i = 0; i < 240; i++) updateMotion(waiting, pose, { x: 0, y: 0 }, 1 / 60, 1, controls)
 assert.ok(Math.abs(pose.y) < 0.001 && Math.abs(waiting.scale - 1) < 0.001, 'Additive motion settles without overriding the section composition')
+
+const ring = { position: [0, 0, 0], rotation: [0, 0, 0] }
+for (let index = 0; index < 3; index++) {
+  const still = structuredClone(updateRingPose(ring, index, 0, 1, 1, true))
+  assert.deepEqual(updateRingPose(ring, index, 300, 1, 1, true), still, 'Reduced motion freezes ring rotation')
+  updateRingPose(ring, index, 1, 0, 1, false)
+  assert.ok(ring.position.every((value) => value === 0), 'Assembled rings share a center')
+  const before = [...ring.rotation]
+  updateRingPose(ring, index, 2, 0, 1, false)
+  assert.notDeepEqual(ring.rotation, before, 'Each ring has independent movement')
+  updateRingPose(ring, index, 2, 1.15, 0, false)
+  assert.ok(ring.position.every((value) => Math.abs(value) < 1.6), 'Exploded and opening poses stay bounded')
+}

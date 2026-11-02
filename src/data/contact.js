@@ -1,6 +1,6 @@
 export const contact = {
-  // Set an https: or mailto: destination to activate the project link.
-  destination: null,
-  pending: 'The project contact destination has not been set yet. You can find public work on GitHub in the meantime.',
+  destination: 'mailto:pranitbhandari2019@gmail.com',
+  email: 'pranitbhandari2019@gmail.com',
   github: 'https://github.com/bhpranit08',
+  linkedin: 'https://www.linkedin.com/in/pranit-bhandari-0976a934b/',
 }
